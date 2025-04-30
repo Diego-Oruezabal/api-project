@@ -16,10 +16,12 @@ class TaskController extends Controller
     public function index()
     {
 
-       // return request()->all();
 
-       // return request('perPage');
         $tasks = Task::query();
+
+
+        $tasks = $tasks->with('user');
+
 
 
         // Aplicar filtros
@@ -48,6 +50,40 @@ class TaskController extends Controller
 
 
          }
+
+
+        // Aplicar selects
+         if(request('select')){
+            $select = request('select');
+            $selectArray = explode(',', $select);
+            $tasks->select($selectArray);
+
+         }
+
+        // Ordenar
+        if(request('sort')) {
+            $sortFields = explode(',',request('sort'));
+
+            foreach ($sortFields as $sortField) {
+                $direction = 'asc';
+
+                if(substr($sortField, 0, 1) == '-') {
+                    $direction = 'desc';
+                    $sortField = substr($sortField, 1);
+                }
+
+                $tasks->orderBy($sortField, $direction);
+
+            }
+
+
+        }
+
+        // Incluir relaciones
+        if (request('include')) {
+            $include = explode(',', request('include'));
+            $tasks = $tasks->with($include);
+        }
 
         // Crear consulta
         if (request('perPage')){
