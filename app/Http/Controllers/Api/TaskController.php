@@ -5,95 +5,28 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
-use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class TaskController extends Controller
+class TaskController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('auth:api', except: ['index','show']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $tasks = Task::getOrPaginate();
+        // return response()->json($tasks);
+        return TaskResource::collection($tasks);
 
-
-        $tasks = Task::query();
-
-
-        $tasks = $tasks->with('user');
-
-
-
-        // Aplicar filtros
-        if (request('filters')) {
-
-            $filters = request('filters');
-
-            foreach ($filters as $field => $conditions) {
-                foreach ($conditions as $operator => $value) {
-
-                    if(in_array($operator, ['=', '>', '<', '>=', '<=', '!=' ])){
-
-                        $tasks->where($field, $operator,$value);
-                    }
-
-                    if($operator == 'like') {
-                        $tasks->where($field, 'like', "%$value%");
-
-                    }
-
-
-
-                }
-
-            }
-
-
-         }
-
-
-        // Aplicar selects
-         if(request('select')){
-            $select = request('select');
-            $selectArray = explode(',', $select);
-            $tasks->select($selectArray);
-
-         }
-
-        // Ordenar
-        if(request('sort')) {
-            $sortFields = explode(',',request('sort'));
-
-            foreach ($sortFields as $sortField) {
-                $direction = 'asc';
-
-                if(substr($sortField, 0, 1) == '-') {
-                    $direction = 'desc';
-                    $sortField = substr($sortField, 1);
-                }
-
-                $tasks->orderBy($sortField, $direction);
-
-            }
-
-
-        }
-
-        // Incluir relaciones
-        if (request('include')) {
-            $include = explode(',', request('include'));
-            $tasks = $tasks->with($include);
-        }
-
-        // Crear consulta
-        if (request('perPage')){
-            $tasks =$tasks->paginate(request('perPage'));
-
-        }else {
-            $tasks = $tasks->get();
-        }
-
-         return response()->json($tasks);
     }
 
     /**
@@ -101,6 +34,9 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
+
+        //return auth('api')->user();
+
       /*  $request->validate([
             'body' => 'required',
             'user_id' => ['required','exists:users,id'],
@@ -108,8 +44,12 @@ class TaskController extends Controller
         ]);
         */
 
-        $task = Task::create($request->all());
-        return response()->json($task, 201);
+        $data = $request-> all();
+        $data['user_id'] = auth('api')->id();
+
+        $task = Task::create($data);
+        // return response()->json($task, 201);
+        return TaskResource::make($task);
     }
 
     /**
@@ -118,7 +58,11 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         // $task = Task::find($task);
-        return response()->json($task);
+        // return response()->json($task);
+
+       return TaskResource::make($task);
+
+
     }
 
     /**
@@ -137,7 +81,8 @@ class TaskController extends Controller
 
        // $task = Task::find($task);
         $task->update($request->all());
-        return response()->json($task);
+        // return response()->json($task);
+        return TaskResource::make($task);
     }
 
     /**
