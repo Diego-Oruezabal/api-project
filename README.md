@@ -2,6 +2,8 @@
 
 **API Project** es una aplicación web desarrollada con Laravel que implementa una API RESTful para gestionar recursos. Este proyecto sirve como base para construir y escalar servicios web robustos y eficientes.
 
+Mi idea es que sirva de base para crear un blog personal , donde se puedan crear, editar, eliminar y mostrar posts. 
+
 ## ✨ Características
 
 - ✅ Implementación de una API RESTful utilizando Laravel.
