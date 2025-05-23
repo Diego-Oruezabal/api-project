@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller implements HasMiddleware
@@ -60,7 +61,8 @@ class PostController extends Controller implements HasMiddleware
 
     public function tags(Request $request, Post $post)
     {
-        $data = $request-> validate([
+        Gate::authorize('author', $post);
+         $request-> validate([
             'tags' => 'required|array|min:1',
         ]);
 
@@ -94,8 +96,10 @@ class PostController extends Controller implements HasMiddleware
      */
     public function update(Request $request, Post $post)
     {
+       Gate::authorize('author', $post);
 
-             $data = $request->validate([
+
+            $data = $request->validate([
              'title' => 'required',
              'slug' => 'required|unique:posts,slug,' . $post->id,
              'excerpt' => 'required',
@@ -122,8 +126,9 @@ class PostController extends Controller implements HasMiddleware
      */
     public function destroy(Post $post)
     {
-        $post->delete();
+        Gate::authorize('author', $post);
 
+        $post->delete();
         return response()->noContent();
     }
 }
