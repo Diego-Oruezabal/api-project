@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ Route::apiResource('tasks', TaskController::class);
 Route::apiResource('categories', CategoryController::class);
 
 Route::apiResource('permissions', PermissionController::class);
+Route::apiResource('roles',RoleController::class);
 
 Route::post('posts/{post}/tags', [PostController::class, 'tags']);
 
