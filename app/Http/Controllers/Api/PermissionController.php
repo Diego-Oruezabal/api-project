@@ -5,15 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PermissionResource;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 
-class PermissionController extends Controller
+class PermissionController extends Controller implements HasMiddleware
 {
+           public static function middleware(): array
+    {
+        return [
+            new Middleware('auth:api'),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+
+        Gate::authorize('permission.index', 'api');
+
         $permissions = Permission::all();
         return PermissionResource::collection($permissions);
     }
@@ -23,6 +35,9 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
+
+        Gate::authorize('permission.store', 'api');
+
         $data = $request->validate([
             'name' => 'required|unique:permissions,name|max:255',
 
@@ -38,6 +53,8 @@ class PermissionController extends Controller
      */
     public function show(Permission $permission)
     {
+
+        Gate::authorize('permission.show', 'api');
         return PermissionResource::make($permission);
     }
 
@@ -46,6 +63,9 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Permission $permission)
     {
+
+        Gate::authorize('permission.update', 'api');
+
         $data = $request->validate([
             'name' => 'required|unique:permissions,name,' . $permission->id . '|max:255',
         ]);
@@ -59,6 +79,8 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
+
+        Gate::authorize('permission.destroy', 'api');
         $permission->delete();
         return response()->json(null, 204);
     }

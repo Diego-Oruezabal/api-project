@@ -25,13 +25,19 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:roles,name',
-
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
         ]);
+
+
 
         $role = Role::create([
             'name' => $request->name,
             'guard_name' => 'api',
         ]);
+
+        $permissions = $request->permissions ?? [];
+        $role->permissions()-> attach($permissions);
 
         return RoleResource::make($role);
     }
@@ -56,6 +62,9 @@ class RoleController extends Controller
         $role->update([
             'name' => $request->name,
         ]);
+
+        $permissions = $request->permissions ?? [];
+        $role->permissions()-> sync($permissions);
 
         return RoleResource::make($role);
 
